@@ -41,8 +41,9 @@ class Camera:
                 return cmd
     
     # collect images from camera
-    def collect(self, outdir:str=None):
+    def collect(self, outdir:str=None, batchfile:str=None):
         outdir = 'collect_pics' if outdir is None else outdir
+        batchfile = 'batch.txt' if batchfile is None else batchfile
         os.makedirs(outdir, exist_ok=True)
         img_id = 0
         imgs = []
@@ -52,8 +53,15 @@ class Camera:
                 self.set_command('')
                 break
             elif cmd == 'batch':
+                if os.path.isfile(batchfile):
+                    with open(batchfile) as f:
+                        img_paths = f.readlines()
+                        img_paths = [img_path.strip() for img_path in img_paths]
+                        for img_path in img_paths:
+                            if os.path.exists(img_path):
+                                os.remove(img_path)
                 self.logger.info(f'save batch')
-                with open('batch.txt', 'w') as f:
+                with open(batchfile, 'w') as f:
                     self.logger.info(imgs)
                     f.write('\n'.join(imgs))
                     imgs = []
