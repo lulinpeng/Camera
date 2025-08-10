@@ -47,6 +47,7 @@ class Camera:
         os.makedirs(outdir, exist_ok=True)
         img_id = 0
         imgs = []
+        batch_id = 0
         while True:
             cmd = self.get_command()
             if cmd == 'stop':
@@ -63,6 +64,8 @@ class Camera:
                 self.logger.info(f'save batch')
                 with open(batchfile, 'w') as f:
                     self.logger.info(imgs)
+                    f.write(f'{str(batch_id).zfill(6)}\n')
+                    batch_id += 1
                     f.write('\n'.join(imgs))
                     imgs = []
                 self.set_command('')
