@@ -62,7 +62,7 @@ class Camera:
             if success:
                 cv2.imshow("Image", img)
                 interval = round(1000 / self.fps)
-                img_path = os.path.join(outdir, f'{str(img_id).zfill(6)}.jpg')
+                img_path = os.path.abspath(os.path.join(outdir, f'{str(img_id).zfill(6)}.jpg'))
                 img_id += 1
                 self.logger.info(f'collect image {img_path}')
                 cv2.imwrite(img_path, img)
