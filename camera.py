@@ -3,18 +3,25 @@ import os
 import argparse
 import logging
 import math
+import time
 
-class Camera:
+class NetCamera:
     def __init__(self, camera_index:int=None, fps:float=None, width:int=None, height:int=None, cmdfile:str=None):
         logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         logging.getLogger().setLevel(logging.INFO)
         self.logger = logging.getLogger()
         self.camera_index = 0 if camera_index is None else camera_index
         self.cmdfile = 'cmd.txt' if cmdfile is None else cmdfile
-        self.fps = 5.0 if fps is None else fps
-        self.width = 640 if width is None else width
-        self.height = 480 if height is None else height
-        self.cap = cv2.VideoCapture(self.camera_index)
+        self.fps = 15.0 if fps is None else fps
+        # self.width = 640 if width is None else width
+        # self.height = 480 if height is None else height
+        # self.cap = cv2.VideoCapture(self.camera_index)
+        
+        self.width = 720
+        self.height = 720
+        self.stream_url = "http://192.168.1.14:8080/video"
+        self.cap = cv2.VideoCapture(self.stream_url)
+        
         self.logger.info(f'CAP_PROP_FRAME_WIDTH = {self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)}')
         self.logger.info(f'CAP_PROP_FRAME_HEIGHT = {self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -27,15 +34,14 @@ class Camera:
         self.logger.info(f"Is camera open?  {self.cap.isOpened()}")
         return
     
-    def show_all_cameras(self):
+    def list_available_cameras(self):
         cameras = []
         for i in range(10):
             cap = cv2.VideoCapture(i)
-            if cap.read()[0]:
+            if cap is not None and cap.isOpened():
                 cameras.append(i)
                 cap.release()
-            else:
-                break
+            time.sleep(0.1)
         return cameras
     
     def get_command(self):
@@ -111,10 +117,10 @@ if __name__ == '__main__':
         parser.print_help()
     if args.command == 'collect':
         print(f'+++++ collect +++++')
-        camera = Camera(fps = args.fps, camera_index = args.camera)
+        camera = NetCamera(fps = args.fps, camera_index = args.camera)
         camera.collect()
     elif args.command == 'show':
         print(f'+++++ show +++++')
-        camera = Camera()
-        cameras = camera.show_all_cameras()
+        camera = NetCamera()
+        cameras = camera.list_available_cameras() 
         print(f'All availiable cameras are {cameras}')
